@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restore Procedures - Fabric Server</title>
+    <link rel="stylesheet" href="../../index.css">
+    <style>
+        h2 { color: #7aa2f7; margin-top: 30px; border-bottom: 1px solid #414868; padding-bottom: 10px; }
+        h3 { color: #7aa2f7; margin-top: 25px; }
+        .critical {
+            background: #2d2d1f;
+            border-left: 5px solid #f7768e;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #1f2335;
+            border: 1px solid #414868;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.95em;
+            color: #9ece6a;
+        }
+        li { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <p style="margin-bottom: 20px;"><a href="../../minecraft/">← Back to Minecraft Server Info</a> | <a href="../">Documentation</a></p>
+
+    <h1>🚨 Emergency Restoration Procedures</h1>
+    <p>This document outlines how to restore the Minecraft world data from Google Drive in the event of data corruption, accidental deletion, or total server migration.</p>
+
+    <div class="critical">
+        <strong>Pre-requisites:</strong> This guide assumes you have already completed the <strong>Server Installation</strong> and <strong>Rclone Configuration</strong> steps from the main manual.
+    </div>
+
+    <h2>1. Stop the Bleeding</h2>
+    <p>Never attempt to restore files while the server is running. This will cause file conflicts and corruption.</p>
+    <pre># Stop the system service
+sudo systemctl stop minecraft
+
+# Verify it is down (should say "inactive")
+sudo systemctl status minecraft</pre>
+
+    <h2>2. Locate the Backup</h2>
+    <p>Use Rclone to list the available backups on the remote storage to find the correct timestamp.</p>
+    <pre># List files in the backup directory
+rclone lsl gdrive:backups/minecraft_25565</pre>
+    <p><em>Note the filename you want to restore, e.g., <code>world_2026-01-17_04-00.zip</code>.</em></p>
+
+    <h2>3. Download the Backup</h2>
+    <p>Switch to the service user and download the target zip file to a temporary location.</p>
+    <pre>su - mcserver
+mkdir -p ~/restore_temp
+rclone copy gdrive:backups/minecraft_25565/world_2026-01-17_04-00.zip ~/restore_temp</pre>
+
+    <h2>4. Swap the Worlds</h2>
+    <p>Move the current (broken) world aside instead of deleting it, just in case. Then unzip the backup.</p>
+    <pre>cd ~/fabric_server
+
+# 1. Rename the broken world folder (Safety Net)
+mv world world_BROKEN_$(date +%F)
+
+# 2. Unzip the backup
+# -d specifies the destination directory
+unzip ~/restore_temp/world_2026-01-17_04-00.zip -d .
+
+# 3. Verify folder structure
+# You should see a folder named "world" inside fabric_server
+ls -F</pre>
+
+    <h2>5. Permission Fix (Critical)</h2>
+    <p>If you unzipped files as <code>root</code> by mistake, the server will crash. Ensure the service user owns the new files.</p>
+    <pre># Run this as your sudo user if you are not currently mcserver
+exit
+sudo chown -R mcserver:mcserver /home/mcserver/fabric_server/world</pre>
+
+    <h2>6. Restart and Verify</h2>
+    <p>Bring the server back online.</p>
+    <pre>sudo systemctl start minecraft
+
+# Check the console to ensure it loaded the world correctly
+sudo su - mcserver
+screen -r mcserver</pre>
+
+    <p style="margin-top: 40px; font-size: 0.9em; color: #414868; text-align: center;">
+        <a href="../">← Back to Documentation</a>
+    </p>
+
+</body>
+</html>
