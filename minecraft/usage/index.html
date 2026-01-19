@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Operations & Usage</title>
+    <link rel="stylesheet" href="../../index.css">
+    <style>
+        h2 { color: #7aa2f7; margin-top: 30px; border-bottom: 1px solid #414868; padding-bottom: 10px; }
+        h3 { color: #7aa2f7; margin-top: 25px; }
+        .warning {
+            background: #2d2d1f;
+            border-left: 5px solid #ff9e64;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .critical {
+            background: #2d2d1f;
+            border-left: 5px solid #f7768e;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #1f2335;
+            border: 1px solid #414868;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.95em;
+            color: #9ece6a;
+        }
+        li { margin-bottom: 10px; }
+        a { color: #7aa2f7; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <p style="margin-bottom: 20px;"><a href="../">← Back to Minecraft Documentation</a> | <a href="../../">Documentation Portal</a></p>
+
+    <h1>🛠️ Server Operations Guide</h1>
+    <p>Daily maintenance procedures, performance monitoring, and file management rules for the Fabric 1.21.1 instance.</p>
+    <div class="note" style="background: #24283b; border-left: 5px solid #7aa2f7; padding: 15px; margin: 15px 0; border-radius: 4px;">
+        <strong>Note:</strong> This documentation applies to the <strong>current server configuration</strong>. If a new server is set up using the <a href="../setup/">setup guides</a>, operational procedures may differ slightly. See the <a href="../">Minecraft Documentation</a> for configuration details.
+    </div>
+
+    <h2>1. Directory Structure & Scripts</h2>
+    
+    <h3>Server Home Directory</h3>
+    <p>The server home directory is <code>~</code> (also <code>/home/server</code>). SSH puts you here by default.</p>
+    <ul>
+        <li><code>backups/</code> - Contains daily server backups (collected at 04:00 AM and uploaded to Google Drive)</li>
+        <li><code>docs/</code> - Additional server documentation</li>
+        <li><code>minecraft-fabric-server/</code> - Main Minecraft server directory containing world data, mods, and configs</li>
+    </ul>
+
+    <h3>Important Scripts</h3>
+    <ul>
+        <li><code>./start.sh</code> - Starts the server. <strong>Must run in a virtual terminal</strong> (using screen), otherwise the server shuts down when the terminal closes.</li>
+        <li><code>./upload_mods.sh</code> - Zips the mods directory and uploads it to Google Drive</li>
+    </ul>
+
+    <h2>2. Virtual Terminals (Screen)</h2>
+    <p>The server runs in a background "screen" session to keep it alive when you disconnect.</p>
+    
+    <h3>Common Screen Commands</h3>
+    <ul>
+        <li><code>screen -r minecraft</code> - Resume (attach to) the existing Minecraft virtual terminal</li>
+        <li><code>screen -S minecraft</code> - Create a new virtual terminal named "minecraft"</li>
+        <li><code>screen -list</code> - Show all running virtual terminals and their session IDs</li>
+        <li><code>screen -X -S &lt;session_id&gt; quit</code> - Close a specific virtual terminal session</li>
+    </ul>
+
+    <h3>Detaching from Console (Safe Exit)</h3>
+    <div class="critical">
+        <strong>DO NOT press Ctrl+C.</strong> This will kill the server process immediately and may corrupt game files.
+    </div>
+    <p>To leave the console running in the background:</p>
+    <ul>
+        <li>Press <code>Ctrl + A</code></li>
+        <li>Then press <code>D</code></li>
+    </ul>
+    <p><strong>Note:</strong> Only one Minecraft virtual terminal session can exist at a time.</p>
+
+    <h2>3. Server Console Commands</h2>
+    <p>When attached to the server console (via <code>screen -r minecraft</code>), you can type Minecraft commands:</p>
+    <ul>
+        <li><code>stop</code> - Gracefully shuts down the server. Wait for the "Saving chunks" message to complete before proceeding.</li>
+        <li><code>/op &lt;player&gt;</code> - Give operator privileges to a player</li>
+        <li><code>/whitelist &lt;add|remove&gt; &lt;player&gt;</code> - Manage the whitelist</li>
+    </ul>
+
+    <h2>4. Power Cycle Procedures</h2>
+
+    <h3>Manual Restart</h3>
+    <p>If you need to restart the server manually:</p>
+    <ol>
+        <li>Attach to console: <code>screen -r minecraft</code></li>
+        <li>Type <code>stop</code> in the game console</li>
+        <li>Wait for the "Saving chunks" message to complete</li>
+        <li>Exit to the regular terminal</li>
+        <li>Run the start script:
+            <pre>./start.sh</pre>
+        </li>
+    </ol>
+
+    <h3>Hardware Constraints</h3>
+    <div class="warning">
+        <strong>RAM Limit:</strong> The server is allocated <strong>10GB</strong> of RAM. Do not increase this beyond <strong>12GB</strong> or the Linux kernel will crash due to lack of memory overhead.
+    </div>
+
+    <h2>5. Mod & Datapack SOP</h2>
+    <p>Fabric has strict file placement rules. Misplacing these files will prevent the server from starting.</p>
+
+    <h3>Mods (.jar)</h3>
+    <p><strong>Location:</strong> <code>~/minecraft_server/mods/</code></p>
+    <ul>
+        <li><strong>Rule:</strong> ALL <code>.jar</code> files go here, even if they seem like content packs (e.g., "Gardener's Dream").</li>
+        <li><strong>Sync:</strong> Players MUST install these mods on their own computers to join.</li>
+    </ul>
+
+    <h3>Datapacks (.zip)</h3>
+    <p><strong>Location:</strong> <code>~/minecraft_server/world/datapacks/</code></p>
+    <ul>
+        <li><strong>Rule:</strong> Only <code>.zip</code> datapacks go here. No jars.</li>
+    </ul>
+
+    <h2>6. Performance Monitoring</h2>
+    <p>Use the installed <strong>Spark</strong> mod to diagnose lag.</p>
+
+    <h3>Check Health (TPS/RAM)</h3>
+    <pre>/spark health</pre>
+    <p><em>Displays current Ticks Per Second and Memory usage.</em></p>
+
+    <h3>Profile Lag Spikes</h3>
+    <pre>/spark profiler start
+# ... Wait 2 minutes ...
+/spark profiler stop</pre>
+    <p><em>Generates a web link to analyze exactly what mod is causing lag.</em></p>
+
+    <h2>7. Offsite Backups</h2>
+    <p>Backups run automatically every day at 04:00 AM. You can access the archives directly below.</p>
+    
+    <p style="background: #1f2335; padding: 15px; border-radius: 5px; border: 1px solid #414868;">
+        <strong>📁 Google Drive Archive:</strong><br>
+        <a href="https://drive.google.com/drive/folders/1yE9wjVu2AkK_bRUnVYhvuOSSmVFeemH3?usp=sharing" target="_blank">
+            https://drive.google.com/drive/folders/1yE9wjVu2AkK_bRUnVYhvuOSSmVFeemH3?usp=sharing
+        </a>
+    </p>
+
+    <p style="margin-top: 40px; font-size: 0.9em; color: #414868; text-align: center;">
+        <a href="../">← Back to Minecraft Documentation</a>
+    </p>
+
+</body>
+</html>

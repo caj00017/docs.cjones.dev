@@ -7,7 +7,7 @@ This repository hosts comprehensive documentation at [docs.cjones.dev](https://d
 ### MPX
 Documentation for the MPX project as featured on [cjones.dev](https://cjones.dev). Includes the user's and programmer's manuals from the latest release.
 
-### Ubuntu TCP Server (Minecraft)
+### Ubuntu Fabric Minecraft Server
 System administration resources for the Fabric Minecraft server infrastructure, as referenced on [ip.cjones.dev/minecraft](https://ip.cjones.dev/minecraft). Covers:
 - **Setup**: Installation and configuration procedures for bare-metal Linux deployment
 - **Usage**: Daily maintenance, server operations, and performance monitoring
@@ -15,14 +15,16 @@ System administration resources for the Fabric Minecraft server infrastructure, 
 
 ## Structure
 
-- `setup/` - Initial setup and installation guides
-- `usage/` - Operational procedures and maintenance documentation
-- `restore/` - Backup recovery and restoration procedures
+- `index.html` - Main documentation portal with links to all projects
+- `minecraft/` - Minecraft server documentation
+  - `minecraft/setup/` - Installation guides
+  - `minecraft/usage/` - Daily operations and maintenance
+  - `minecraft/restore/` - Backup recovery procedures
 - `index.css` - Consistent styling across all documentation pages
 
 ## Accessing the Documentation
 
-Each section is self-contained with clear navigation links.
+Start at [index.html](index.html) for the main portal, then navigate to specific project documentation. Each section is self-contained with clear navigation links back to the portal.
 
 ## Styling
 
